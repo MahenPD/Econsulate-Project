@@ -3,27 +3,11 @@ const users = express.Router();
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const nodemailer = require('nodemailer');
 
 const User = require('../models/user.model');
 users.use(cors());
 
-var config = {
-  service: 'gmail',
-  host: 'smtp.gmail.com',
-  port: 25,
-  auth: {
-      user: 'mahen.2017441@iit.ac.lk',
-      pass: 'LOGOUTAFTERURDONE'
-  }
-};
-
-var transporter = nodemailer.createTransport(config);
-
-var defaultMail = {
-  from: 'Me <mahen.2017441@iit.ac.lk>',
-  text: 'test text',
-};
+var mail =  require('./sendEmail');
 
 process.env.SECRET_KEY = 'secret';
 
@@ -47,11 +31,7 @@ users.post('/register', (req, res) => {
           newUser.password = hash;
           User.create(newUser)
             .then(user => {
-                mail = _.merge({}, defaultMail, mail);
-                transporter.sendMail(mail, function(error, info){
-                    if(error) return console.log(error);
-                    console.log('mail sent:', info.response);
-                });
+              mail.function_mail(user.email);
               res.json({ status: user.email + ' has been succesfully registered' });
             })
             .catch(err => {
